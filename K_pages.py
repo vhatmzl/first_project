@@ -50,7 +50,7 @@ def kchange():
     tmp = data.copy()
 
     st.dataframe(tmp)
-    st.info("지역별 출생, 사망, 그에 따른 인구 감소, 결혼, 이혼 정보를 나타냅니다.")
+    st.info("지역별 출생, 사망, 그에 따른 인구 감소, 결혼, 이혼 정보를 나타냅니다.") 
 
     st.subheader('각 카테고리 별 인구 변화')
     st.info('그래프는 순서대로 서울, 부산, 대구, 인천, 광주, 대전, 울산, 세종, 경기, 강원, 충북, 충남, 전북, 전남, 경북, 경남, 제주를 나타냅니다.')
@@ -73,7 +73,46 @@ def kchange():
         st.rerun()
 
 def kbigyo():
-    pass
+    tmp = data.copy()
+    st.title("지역별 ")
+    st.info('지역별 출생, 사망, 그에 따른 인구 감소, 결혼, 이혼 정보 비교')
+
+    selected_area = st.sidebar.selectbox('지역 선택', data['Area'])
+
+    # 선택된 지역의 데이터 가져오기
+    selected_data = data[data['Area'] == selected_area]
+
+    # 그래프 그리기
+    st.set_option('deprecation.showPyplotGlobalUse', False)
+    st.subheader(f'{selected_area}의 출생, 사망자, 자연 증가, 결혼, 이혼')
+    plt.figure(figsize=(6, 6))
+    sns.barplot(data=selected_data[['출생', '사망자', '자연 증가', '결혼', '이혼']], palette='viridis')
+    st.pyplot()
+
+    if st.button("next",use_container_width=True):
+        st.session_state['page']='지도'
+        st.rerun()
 
 def ksido():
-    pass
+    tmp = data.groupby('Area').mean()
+    tmp.index = [SIDOS[idx] for idx in tmp.index]
+    tmp.reset_index(inplace=True)
+    # tmp.AGE_GROUP=tmp.AGE_GROUP.astype('int')
+    tiles = ['CartoDB dark_matter', 'OpenStreetMap', 'CartoDB Voyager']
+    with st.sidebar:
+        st.divider()
+        t = st.sidebar.radio('Map', tiles)
+        col = st.selectbox('분석 컬럼 선택',tmp.columns[1:])
+
+    map = folium.Map(location=[36.194012, 127.5019596], zoom_start=7, scrollWheelZoom=True, tiles=t)
+    choropleth = folium.Choropleth(
+        geo_data='SIDO_MAP_2022_cp949.json',
+        data=tmp,
+        columns=('index', col),
+        key_on='feature.properties.CTP_KOR_NM',
+        line_opacity=0.8,
+        highlight=True
+    )
+    choropleth.geojson.add_to(map)
+
+    st_map = st_folium(map, width=600, height=700)
