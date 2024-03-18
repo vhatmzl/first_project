@@ -8,7 +8,7 @@ from K_pages import *
 if 'page' not in st.session_state:
     st.session_state['page'] = 'HOME'
 
-menus = {"HOME": home, "지역별 인구 변화": kchange, "지역별 인구 비교": kbigyo, "지도": ksido}
+menus = {"HOME": home, "지역별 인구 변화": kchange, "지역별 인구 비교": kbigyo, "연도별 변화": kyear, "지도": ksido}
 
 with st.sidebar:
     for menu in menus.keys():

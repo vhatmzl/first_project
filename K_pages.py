@@ -5,6 +5,8 @@ import folium
 import matplotlib.pyplot as plt
 import seaborn as sns
 import time
+import numpy as np
+
 
 sns.set_theme(style='whitegrid', font_scale=1.5)
 sns.set_palette('Set2', n_colors=10)
@@ -26,21 +28,23 @@ def get_datas():
 
 data = get_datas()
 
+@st.cache_data
+def k_datas():
+    data = pd.read_csv("k_bddm.csv", index_col=0)
+    return data
+
+k_data = k_datas()
+
 def txt_gen(txt):
     for t in list(txt):
         yield t
         time.sleep(0.1)
 
 def home():
-    APP_SUB_TITLE = '대한민국 지역별 인구 조사'
-    # st.title(APP_TITLE)
-    st.caption(APP_SUB_TITLE)
-    st.subheader("인구 정보")
-    st.info("지역별 인구 변화 (2022년)")
-    st.divider()
-    txt = "현재 데이터는 2022년도 지역별 인구 변화 정보를 나타냅니다."
+    st.subheader("지역별 인구 변화 (2022년)")
+    st.info("해당 정보는 2022년도 자료 기반 출생, 죽음, 결혼, 이혼의 내용을 포함하고 있습니다.")
+    st.image("down.jpg", caption="2022년도 자료 기반 인구 변화 그래프", width=700)
 
-    st.write_stream(txt_gen(txt))
     if st.button("next",use_container_width=True):
         st.session_state['page']='지역별 인구 변화'
         st.rerun()
@@ -50,14 +54,12 @@ def kchange():
     tmp = data.copy()
 
     st.dataframe(tmp)
-    st.info("지역별 출생, 사망, 그에 따른 인구 감소, 결혼, 이혼 정보를 나타냅니다.") 
+    st.info("지역별 출생, 사망, 그에 따른 자연 증가, 결혼, 이혼 정보를 나타냅니다.") 
 
     st.subheader('각 카테고리 별 인구 변화')
-    st.info('그래프는 순서대로 서울, 부산, 대구, 인천, 광주, 대전, 울산, 세종, 경기, 강원, 충북, 충남, 전북, 전남, 경북, 경남, 제주를 나타냅니다.')
     tmp = tmp.groupby('Area').mean()
     col = st.selectbox('지역 선택',tmp.columns[:])
     whole_values = tmp[tmp.index!=2020].groupby('Area')[[col]].mean()
-    st.download_button('Download',whole_values.to_csv(encoding='euc-kr'), 'test.csv')
     colors = [tab10.colors[i % 10] for i in range(len(whole_values))]
 
     fig, ax = plt.subplots()
@@ -72,7 +74,7 @@ def kchange():
         st.session_state['page']='지역별 인구 비교'
         st.rerun()
 
-def kbigyo():
+def kbigyo(): 
     tmp = data.copy()
     st.title("지역별 ")
     st.info('지역별 출생, 사망, 그에 따른 인구 감소, 결혼, 이혼 정보 비교')
@@ -88,6 +90,19 @@ def kbigyo():
     plt.figure(figsize=(6, 6))
     sns.barplot(data=selected_data[['출생', '사망자', '자연 증가', '결혼', '이혼']], palette='viridis')
     st.pyplot()
+
+    if st.button("next",use_container_width=True):
+        st.session_state['page']='연도별 변화'
+        st.rerun()
+
+def kyear():
+    st.title("년도별 추이상황")
+    k_tmp = k_data.copy()
+
+    st.dataframe(k_tmp)
+    st.info("년도별 출생, 죽음, 결혼 이혼 정보를 나타냅니다.") 
+    k_data.set_index('title', inplace=True)
+    st.line_chart(k_data, use_container_width=True)
 
     if st.button("next",use_container_width=True):
         st.session_state['page']='지도'
