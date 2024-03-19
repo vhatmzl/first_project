@@ -2,7 +2,7 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 import matplotlib.pyplot as plt
-from K_pages import *
+from K_sub_main import *
 
 # 상태 저장
 if 'page' not in st.session_state:
