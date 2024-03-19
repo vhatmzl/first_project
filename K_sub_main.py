@@ -84,7 +84,7 @@ def kbigyo():
 
 
 def kyear():
-    st.title("연도별 추이상황")
+    st.title("연도별 추이")
     k_tmp = k_data.copy()
 
     st.dataframe(k_tmp)
