@@ -15,7 +15,7 @@ with st.sidebar:
     sidebar_style = """
         <style>
             .sidebar .sidebar-content {
-                background-color: #3498db;
+                background-color: #ADD8E6;
                 color: white;
             }
         </style>
